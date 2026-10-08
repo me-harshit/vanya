@@ -11,7 +11,8 @@
     "test": "node --import tsx --test \"test/**/*.test.ts\"",
     "db:check": "tsx scripts/check-db.ts",
     "admin:create": "tsx scripts/create-admin.ts",
-    "seed:cities": "tsx scripts/seed-cities.ts"
+    "seed:cities": "tsx scripts/seed-cities.ts",
+    "seed:demo": "tsx scripts/seed-demo.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",

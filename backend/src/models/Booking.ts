@@ -27,6 +27,20 @@ const stopSchema = new Schema(
 
 const contactSchema = new Schema({ phone: { type: String, required: true }, email: String }, { _id: false });
 
+const tripInfoSchema = new Schema(
+  {
+    operatorName: { type: String, required: true },
+    busName: { type: String, required: true },
+    busKind: { type: String, required: true },
+    ac: { type: Boolean, required: true },
+    fromCityName: { type: String, required: true },
+    toCityName: { type: String, required: true },
+    departureAt: { type: Date, required: true },
+    arrivalAt: { type: Date, required: true },
+  },
+  { _id: false },
+);
+
 const pricingSchema = new Schema(
   {
     farePaise: { type: Number, required: true },
@@ -50,16 +64,7 @@ const bookingSchema = new Schema(
     boardingPoint: { type: stopSchema, required: true },
     droppingPoint: { type: stopSchema, required: true },
     contact: { type: contactSchema, required: true },
-    tripInfo: {
-      operatorName: String,
-      busName: String,
-      busKind: String,
-      ac: Boolean,
-      fromCityName: String,
-      toCityName: String,
-      departureAt: Date,
-      arrivalAt: Date,
-    },
+    tripInfo: { type: tripInfoSchema, required: true },
     pricing: { type: pricingSchema, required: true },
     commission: { percent: Number, paise: Number, operatorEarningPaise: Number },
     holdExpiresAt: { type: Date, required: true },

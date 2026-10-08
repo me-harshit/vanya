@@ -7,6 +7,7 @@ import { requireAuth } from "../../middleware/auth.js";
 import { Booking } from "../../models/Booking.js";
 import { Payment } from "../../models/Payment.js";
 import { Refund } from "../../models/Refund.js";
+import { Trip } from "../../models/Trip.js";
 import type { BookingService } from "./bookings.service.js";
 
 const passenger = z.object({
@@ -79,6 +80,43 @@ export function bookingRoutes(service: BookingService) {
     const body = verifyBody.parse(req.body);
     const booking = await service.verifyCheckout(req.user!, idParam(req.params.id), body);
     res.json({ booking: customerView(booking), confirmed: booking.status === "confirmed" });
+  });
+
+  // Everything the ticket screen needs in one call, including the text to put in the QR code.
+  r.get("/:id/ticket", async (req, res) => {
+    const booking = await Booking.findOne({ _id: idParam(req.params.id), user: req.user!.id });
+    if (!booking) throw new AppError(404, "NOT_FOUND", "Booking not found.");
+    if (booking.status !== "confirmed" && booking.status !== "cancelled") {
+      throw new AppError(409, "NO_TICKET", "There is no ticket until the booking is paid.");
+    }
+    const trip = await Trip.findById(booking.trip, { cancellationPolicy: 1, durationMinutes: 1 });
+
+    const stop = (s: { point: unknown; name: string; address?: string | null; landmark?: string | null; time: Date }) => ({
+      id: String(s.point), name: s.name, address: s.address ?? null, landmark: s.landmark ?? null, time: s.time,
+    });
+    res.json({
+      ticket: {
+        bookingId: booking.id,
+        pnr: booking.pnr,
+        status: booking.status,
+        qrText: `VANYA:${booking.pnr}`, // the conductor's scanner looks the booking up by this PNR
+        from: booking.tripInfo.fromCityName,
+        to: booking.tripInfo.toCityName,
+        departureAt: booking.tripInfo.departureAt,
+        arrivalAt: booking.tripInfo.arrivalAt,
+        durationMinutes: trip?.durationMinutes ?? null,
+        operatorName: booking.tripInfo.operatorName,
+        bus: { name: booking.tripInfo.busName, kind: booking.tripInfo.busKind, ac: booking.tripInfo.ac },
+        boardingPoint: stop(booking.boardingPoint),
+        droppingPoint: stop(booking.droppingPoint),
+        passengers: booking.passengers.map((p) => ({ seatNo: p.seatNo, name: p.name, age: p.age, gender: p.gender })),
+        contact: { phone: booking.contact.phone, email: booking.contact.email ?? null },
+        pricing: booking.pricing,
+        cancellation: booking.status === "cancelled" ? booking.cancellation : null,
+        cancellationPolicy: trip?.cancellationPolicy ?? [],
+        bookedAt: booking.confirmedAt ?? booking.createdAt,
+      },
+    });
   });
 
   r.get("/:id/cancellation-quote", async (req, res) => {

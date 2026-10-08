@@ -50,7 +50,8 @@ export async function setupTestApp(dbName: string) {
       },
       body: opts.body ? JSON.stringify(opts.body) : undefined,
     });
-    return { status: res.status, json: (await res.json()) as any };
+    const text = await res.text(); // some replies (204 No Content) have no body
+    return { status: res.status, json: (text ? JSON.parse(text) : null) as any };
   };
 
   /** Signs in with an OTP and returns the verify response. */

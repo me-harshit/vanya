@@ -6,6 +6,7 @@ import { config } from "./config.js";
 import { errorHandler, notFound } from "./middleware/errors.js";
 import { adminRoutes } from "./modules/admin/admin.routes.js";
 import { authRoutes } from "./modules/auth/auth.routes.js";
+import { deviceRoutes } from "./modules/auth/devices.routes.js";
 import type { SmsProvider } from "./modules/auth/sms.js";
 import type { BookingService } from "./modules/bookings/bookings.service.js";
 import { bookingRoutes } from "./modules/bookings/bookings.routes.js";
@@ -37,6 +38,7 @@ export function createApp(deps: { sms: SmsProvider; bookings: BookingService }) 
   });
 
   app.use("/auth", authRoutes(deps.sms));
+  app.use("/me/devices", deviceRoutes());
   app.use("/cities", cityRoutes()); // public
   app.use("/trips", publicTripRoutes()); // public browsing; holds need sign-in
   app.use("/bookings", bookingRoutes(deps.bookings));

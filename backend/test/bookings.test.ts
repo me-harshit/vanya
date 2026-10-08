@@ -89,7 +89,7 @@ before(async () => {
   state.board = detail.json.trip.boardingPoints[0].id;
   state.drop = detail.json.trip.droppingPoints[0].id;
 
-  const docs = await User.insertMany(Array.from({ length: 80 }, (_, i) => ({ phone: `9${String(300000000 + i)}`, role: "customer" })));
+  const docs = await User.insertMany(Array.from({ length: 150 }, (_, i) => ({ phone: `9${String(300000000 + i)}`, role: "customer" })));
   state.users = docs.map((u) => ({ id: u.id, token: signToken(u.id, "customer") }));
 });
 
@@ -651,6 +651,50 @@ describe("cancelling a booking", () => {
     const stats = await t.bookings.reconcile();
     assert.ok(stats.seatsReleased >= 1);
     assert.equal((await seat(state.tripIds[5], "3A")).status, "available");
+  });
+});
+
+// ---------- the ticket
+
+describe("the ticket", () => {
+  test("a confirmed booking has a full ticket with a QR text; other people and unpaid bookings do not", async () => {
+    const c = await confirmed(state.tripIds[5], ["10A", "10B"]);
+    const r = await t.api(`/bookings/${c.id}/ticket`, { token: c.u.token });
+    assert.equal(r.status, 200);
+    const k = r.json.ticket;
+    assert.equal(k.status, "confirmed");
+    assert.match(k.pnr, /^[A-HJ-NP-Z2-9]{8}$/);
+    assert.equal(k.qrText, `VANYA:${k.pnr}`);
+    assert.equal(k.from, "Delhi");
+    assert.equal(k.to, "Manali");
+    assert.equal(k.operatorName, "Booking Test Travels");
+    assert.equal(k.boardingPoint.name, "Kashmere Gate");
+    assert.equal(k.droppingPoint.name, "Manali Stand");
+    assert.deepEqual(k.passengers.map((p: any) => p.seatNo), ["10A", "10B"]);
+    assert.equal(k.pricing.totalPaise, totalOf(2));
+    assert.equal(k.durationMinutes, 750);
+    assert.ok(k.cancellationPolicy.length > 0);
+    assert.equal(k.cancellation, null);
+    assert.equal(k.pricing.commission, undefined);
+
+    assert.equal((await t.api(`/bookings/${c.id}/ticket`, { token: nextUser().token })).status, 404);
+    assert.equal((await t.api(`/bookings/${c.id}/ticket`)).status, 401);
+
+    const unpaid = await book(nextUser(), state.tripIds[5], ["10C"]);
+    const owner = state.users[userIdx - 1];
+    const none = await t.api(`/bookings/${unpaid.json.booking.id}/ticket`, { token: owner.token });
+    assert.equal(none.status, 409);
+    assert.equal(none.json.error.code, "NO_TICKET");
+  });
+
+  test("after cancelling, the ticket still opens and shows it as cancelled with the refund", async () => {
+    const c = await confirmed(state.tripIds[5], ["4A"]);
+    await t.api(`/bookings/${c.id}/cancel`, { method: "POST", token: c.u.token, body: {} });
+    const r = await t.api(`/bookings/${c.id}/ticket`, { token: c.u.token });
+    assert.equal(r.status, 200);
+    assert.equal(r.json.ticket.status, "cancelled");
+    assert.equal(r.json.ticket.cancellation.by, "customer");
+    assert.equal(r.json.ticket.cancellation.refundPaise, 90_000);
   });
 });
 
