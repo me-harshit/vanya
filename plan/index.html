@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bus Booking Platform Plan</title>
+<style>
+  :root {
+    --bg: #f7f8fa; --card: #ffffff; --text: #1c2330; --muted: #5b6577;
+    --accent: #d84e55; --border: #e3e6ec; --code: #eef0f4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #12151b; --card: #1a1f28; --text: #e8ebf0; --muted: #9aa4b5; --accent: #ff6b72; --border: #2a313d; --code: #232a35; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  header { padding: 40px 16px 24px; max-width: 960px; margin: 0 auto; }
+  header h1 { margin: 0 0 8px; font-size: 2rem; }
+  header p { margin: 0; color: var(--muted); }
+  nav { position: sticky; top: 0; background: var(--bg); border-bottom: 1px solid var(--border); z-index: 5; }
+  nav .in { max-width: 960px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 14px; overflow-x: auto; white-space: nowrap; }
+  nav a { color: var(--muted); text-decoration: none; font-size: .9rem; }
+  nav a:hover { color: var(--accent); }
+  main { max-width: 960px; margin: 0 auto; padding: 16px; }
+  section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 18px; }
+  h2 { margin: 0 0 12px; font-size: 1.3rem; }
+  h3 { margin: 18px 0 6px; font-size: 1.05rem; }
+  ul, ol { padding-left: 22px; margin: 6px 0; }
+  li { margin: 4px 0; }
+  code { background: var(--code); padding: 1px 6px; border-radius: 5px; font-size: .88em; }
+  .callout { border-left: 4px solid var(--accent); background: var(--code); padding: 10px 14px; border-radius: 6px; margin: 12px 0; }
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .box { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .box h3 { margin-top: 0; }
+  .tag { display: inline-block; font-size: .75rem; padding: 1px 8px; border-radius: 99px; background: var(--code); color: var(--muted); margin-left: 6px; }
+  footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 24px 16px 40px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Bus Booking Platform (India)</h1>
+  <p>Client: Mohit &middot; Developer: Harshit (solo, part-time) &middot; Working target: MVP in about 8 weeks</p>
+</header>
+<nav><div class="in">
+  <a href="#context">Context</a><a href="#how">How it works</a><a href="#arch">Architecture</a><a href="#decisions">Design decisions</a>
+  <a href="#data">Data model</a><a href="#scope">Scope</a><a href="#order">Build order</a><a href="#timeline">Timeline</a>
+  <a href="#files">Structure</a><a href="#verify">Verification</a><a href="#compliance">Compliance</a><a href="#open">Decisions</a>
+</div></nav>
+<main>
+
+<section id="context">
+  <h2>Context</h2>
+  <p>A redBus-style bus booking marketplace, built from scratch. Four deliverables:</p>
+  <ol>
+    <li><strong>Mobile app</strong> (Android + iOS, React Native): full bus booking features, high-quality graphics, animations, modern icons and fonts. <strong>Customers book only in the app.</strong></li>
+    <li><strong>Marketing website</strong> (no booking).</li>
+    <li><strong>Operator portal:</strong> operators list buses directly, via their own ERP, or via a third-party ERP/software provider.</li>
+    <li><strong>Super admin panel:</strong> the client monitors traffic and manages buses, listings, operators and settings.</li>
+  </ol>
+  <div class="grid">
+    <div class="box"><h3>Client (Mohit) provides</h3><ul><li>Domain</li><li>AWS EC2 server</li><li>Google Play Console account</li><li>Apple Developer account</li></ul></div>
+    <div class="box"><h3>Developer (Harshit) builds</h3><ul><li>Mobile app</li><li>Marketing website</li><li>Operator portal</li><li>Super admin panel</li></ul></div>
+  </div>
+  <p>Third-party charges (payment gateway fees, SMS, push, maps) are separate and paid by the client at actuals.</p>
+  <div class="callout"><strong>Reality check:</strong> a full redBus clone is roughly 4&ndash;6 months for a team of about 6. Solo and part-time in 2 months needs a hard-cut MVP. ERP and third-party integrations are the largest risk, so launch with direct listing and add ERP adapters as an incremental phase.</div>
+</section>
+
+<section id="how">
+  <h2>How redBus-style platforms work</h2>
+  <ul>
+    <li><strong>Three sides:</strong> operators (supply), customers (demand), platform (commission, typically 8&ndash;12%, plus convenience fees).</li>
+    <li><strong>Customer flow:</strong> search, filters, seat map, boarding/dropping points, temporary seat hold (5&ndash;10 min), payment, e-ticket, cancel/refund.</li>
+    <li><strong>Hardest part is inventory:</strong> no double-booking, so the seat hold must be atomic.</li>
+  </ul>
+  <h3>How one operator stays in sync across platforms</h3>
+  <p>Take Laxmi Travels on redBus and AbhiBus. The operator has one central booking system (CRS/ERP, such as Bitla, Ticketsimply or eTravelSmart) holding the real seat inventory. Every channel (redBus, AbhiBus, counters, agents, us) reads and writes it via API:</p>
+  <ol>
+    <li>Search / availability (may be cached briefly)</li>
+    <li>Seat layout</li>
+    <li><strong>Block seat:</strong> the real double-booking guard, always checked against the source of truth</li>
+    <li>Confirm booking</li>
+    <li>Cancel</li>
+  </ol>
+  <p>There is no direct redBus-to-AbhiBus sync. Another model is <strong>quota/allotment</strong>: a fixed seat count per channel with no live sync. It is simple, but unsold seats get stranded.</p>
+</section>
+
+<section id="arch">
+  <h2>Architecture <span class="tag">AWS ap-south-1, t2.small to start</span></h2>
+  <ul>
+    <li><strong>Monorepo</strong> (npm workspaces) on GitHub:
+      <ul>
+        <li><code>apps/api</code>: Node.js + TypeScript + Express/Fastify + Mongoose, modular monolith, PM2 behind Nginx + SSL.</li>
+        <li><code>apps/web</code>: React + Vite with separate areas for the marketing site, operator portal (<code>/operator</code>) and super admin (<code>/admin</code>); static build served by Nginx.</li>
+        <li><code>apps/mobile</code>: React Native (Expo), Android + iOS.</li>
+        <li><code>packages/shared</code>: TS types, zod validation, constants.</li>
+      </ul>
+    </li>
+    <li><strong>Deployment:</strong> EC2 in <code>ap-south-1</code> (Mumbai), client-provided, starting on a <code>t2.small</code> (1 vCPU, 2 GB) and scaling as users grow. Nginx, PM2, SSL, Cloudflare (free) in front. Images on S3. Add 1&ndash;2 GB swap. A t2 throttles under sustained load (CPU credits); move to <code>t3</code>/<code>t3a</code> or larger when traffic grows.</li>
+    <li><strong>Database:</strong> MongoDB (free hosted tier to start). No automatic backups on the free tier, so run nightly dumps to off-server storage and upgrade to a paid tier before real traffic.</li>
+    <li><strong>No Redis, queue or Elasticsearch initially.</strong> Seat holds use MongoDB atomic operations; background jobs via <code>node-cron</code> in the API process.</li>
+    <li><strong>UI/UX:</strong> modern design system (icon set, custom fonts, motion such as Reanimated/Lottie on mobile), designed in Figma before building each surface.</li>
+  </ul>
+</section>
+
+<section id="decisions">
+  <h2>Core design decisions</h2>
+  <ol>
+    <li><strong>Seat inventory (own supply):</strong> one <code>Trip</code> doc per bus-departure-date with <code>seats[{no, status, heldUntil, bookingId}]</code>. A hold is an atomic <code>findOneAndUpdate</code> with <code>$elemMatch</code> on an available seat, so no transactions are needed. Holds expire in about 8 minutes (sweep job plus <code>heldUntil</code> check on read).</li>
+    <li><strong>Supplier adapter interface</strong> for every inventory source: <code>search</code>, <code>getSeatLayout</code>, <code>blockSeat</code>, <code>book</code>, <code>cancel</code>.
+      <ul>
+        <li><code>OwnInventoryAdapter</code>: operators listing directly via the portal (built for launch).</li>
+        <li><code>ErpAdapter</code>: one per ERP/CRS vendor, covering every operator on that vendor.</li>
+        <li><code>QuotaAdapter</code> (optional): operator gives a fixed seat quota while selling elsewhere.</li>
+      </ul>
+    </li>
+    <li><strong>Onboarding rule:</strong> do not list a bus as own inventory if the operator also sells it on another platform, unless they give a fixed quota. Otherwise the same seat is sold twice.</li>
+    <li><strong>ERP prerequisites:</strong> partner agreement with the operator or vendor, API credentials/sandbox, agreed commission and fare parity, and clarity on who handles refunds and complaints. The portal has a &ldquo;connect ERP&rdquo; flow storing credentials per operator, a sync status view and error alerts.</li>
+    <li><strong>Payments:</strong> Razorpay Standard Checkout. Server creates the order, the app pays, and an idempotent, signature-verified webhook confirms the booking. Reconciliation cron handles paid-but-unconfirmed and held-but-failed. Refunds via API; simple ledger with manual operator settlement at MVP.</li>
+    <li><strong>Auth:</strong> phone OTP (MSG91, DLT registration needed in India) plus JWT. Roles: customer, operator, admin.</li>
+    <li><strong>Search:</strong> MongoDB index on <code>(fromCityId, toCityId, date)</code> plus a cities collection for autocomplete.</li>
+  </ol>
+</section>
+
+<section id="data">
+  <h2>Data model (MongoDB)</h2>
+  <p><code>users</code>, <code>operators</code> (KYC, commission %, listing mode: direct/ERP/quota, ERP credentials), <code>cities</code>, <code>boardingPoints</code>, <code>buses</code> (type, seat-layout template), <code>routes</code>, <code>trips</code> (bus + route + date + fare + seats[] + source), <code>bookings</code> (passengers, seats, status, pricing, supplier reference), <code>payments</code>, <code>refunds</code>, <code>coupons</code>, <code>ledgerEntries</code>, <code>reviews</code>, <code>cmsPages</code>, <code>auditLogs</code>.</p>
+</section>
+
+<section id="scope">
+  <h2>Scope</h2>
+  <div class="grid">
+    <div class="box"><h3>Mobile app</h3><ul>
+      <li>OTP login</li><li>Search with filters</li><li>Seat map</li><li>Boarding / dropping points</li>
+      <li>Passenger details</li><li>Razorpay payment</li><li>E-ticket (PDF, SMS, email)</li>
+      <li>My Bookings</li><li>Cancel + auto-refund per policy</li><li>Coupons</li><li>Push notifications</li></ul></div>
+    <div class="box"><h3>Marketing website</h3><ul>
+      <li>Landing page, app download links</li><li>How it works</li><li>Operator sign-up call to action</li>
+      <li>Contact</li><li>Privacy, terms, refund pages (also needed for payment gateway and store approval)</li></ul></div>
+    <div class="box"><h3>Operator portal</h3><ul>
+      <li>Sign-up and KYC</li><li>Buses + seat-layout templates</li><li>Routes / schedules, auto-generated trips</li>
+      <li>Fares</li><li>Bookings and passenger manifest</li><li>Cancel trip</li><li>Earnings view</li>
+      <li>Three listing modes: direct, own ERP, third-party ERP</li></ul></div>
+    <div class="box"><h3>Super admin</h3><ul>
+      <li>Approve operators</li><li>Cities / routes master data</li><li>All bookings, refunds</li><li>Commission config, coupons</li>
+      <li>Users, CMS</li><li>Traffic and revenue dashboards</li><li>Reports, audit logs</li></ul></div>
+  </div>
+  <h3>Deferred (post-launch)</h3>
+  <p>Live GPS tracking, ratings/reviews, wallet and referrals, WhatsApp tickets, multi-language, SEO route pages, agent/B2B portal, driver app, automated payouts, ERP adapters beyond the first one or two, Redis/Elasticsearch.</p>
+</section>
+
+<section id="order">
+  <h2>Build order</h2>
+  <ol>
+    <li><strong>Backend and database foundation:</strong> everything depends on it (auth, data model, cities, buses, trips, seat hold, payments).</li>
+    <li><strong>Marketing website:</strong> quick, and a live site with policy pages is needed for payment gateway KYC and store review, so approvals can start while building.</li>
+    <li><strong>Operator portal:</strong> nothing is bookable until operators create buses and trips. Direct listing first; ERP and third-party adapters afterwards.</li>
+    <li><strong>Super admin (minimal first):</strong> approve operators, manage cities and routes. Dashboards, reports and settings follow.</li>
+    <li><strong>Mobile app:</strong> start as soon as search and booking APIs work, not only after admin is finished. Apple review (about a week) is the likeliest thing to overrun.</li>
+    <li><strong>Complete the admin</strong> (traffic monitoring, reports, refunds) alongside app testing.</li>
+  </ol>
+</section>
+
+<section id="timeline">
+  <h2>Timeline <span class="tag">8 weeks, ~30&ndash;40 hrs/week, working target</span></h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Week</th><th>Deliverable</th></tr></thead>
+    <tbody>
+      <tr><td>0 (parallel)</td><td>Client arranges domain, AWS EC2, Play and Apple accounts. Start long-lead items: company/GST, Razorpay KYC, MSG91 + DLT, legal pages, operator outreach, design system in Figma.</td></tr>
+      <tr><td>1</td><td>Repo, CI, server setup (Nginx/PM2/SSL), database, data models, auth (OTP/JWT/roles).</td></tr>
+      <tr><td>2</td><td>Marketing website live; master data (cities/routes/buses), seat-layout builder.</td></tr>
+      <tr><td>3</td><td>Operator portal (direct listing): buses, schedules, trip generation, fares; search API.</td></tr>
+      <tr><td>4</td><td>Seat hold/booking engine with concurrency tests; Razorpay order/webhook/refund; minimal admin.</td></tr>
+      <tr><td>5&ndash;6</td><td>Mobile app (Expo): full booking flow, animations, push, tickets.</td></tr>
+      <tr><td>7</td><td>Notifications, cancellation/refund rules, coupons, reconciliation jobs, full admin dashboards, hardening, load test; submit apps to stores.</td></tr>
+      <tr><td>8</td><td>Pilot with 2&ndash;3 operators on 1&ndash;2 corridors, bug-fix, soft launch.</td></tr>
+      <tr><td>Post-launch</td><td>First ERP adapter, then more vendors; deferred features.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout"><strong>Biggest risks:</strong> ERP integrations (partner access, vendor APIs), Apple review, Razorpay KYC and DLT approvals, operator onboarding, and part-time hours. If behind, cut in this order: ERP adapters, iOS first release (ship Android first), admin reports. Anything affecting booking correctness is cut last.</div>
+</section>
+
+<section id="files">
+  <h2>Planned structure</h2>
+  <ul>
+    <li><code>apps/api/src/modules/{auth,catalog,trips,booking,payments,operators,admin}/</code></li>
+    <li><code>apps/api/src/suppliers/{SupplierAdapter,OwnInventoryAdapter,ErpAdapter,QuotaAdapter}.ts</code>, plus one folder per ERP vendor</li>
+    <li><code>apps/api/src/modules/booking/seatHold.ts</code>: atomic hold / release / confirm (highest-risk code)</li>
+    <li><code>apps/api/src/modules/payments/razorpayWebhook.ts</code> (idempotent) and <code>reconcile.job.ts</code></li>
+    <li><code>packages/shared/src/</code>: types and zod schemas</li>
+    <li><code>deploy/</code>: <code>nginx.conf</code>, <code>ecosystem.config.js</code>, <code>backup.sh</code>; <code>.github/workflows/ci.yml</code> (lint, test, build, SSH deploy)</li>
+  </ul>
+</section>
+
+<section id="verify">
+  <h2>Verification</h2>
+  <ul>
+    <li><code>seatHold</code> tests: 50 parallel holds on one seat give exactly 1 success; expired holds are released.</li>
+    <li>Razorpay test mode: success, failure, abandon, duplicate webhook, webhook before redirect, paid after hold timeout (must auto-refund or re-confirm).</li>
+    <li>ERP adapter tests against vendor sandbox: block/confirm/cancel, timeouts, &ldquo;seat taken elsewhere&rdquo; handling.</li>
+    <li>E2E: search, hold, pay, ticket, cancel, refund on Android/iOS builds (Expo EAS), with operator and admin actions checked in the web portals.</li>
+    <li>k6 load test at about 50 concurrent users on the EC2 instance; watch memory (PM2) and database limits.</li>
+    <li>Backup/restore drill.</li>
+    <li>Pilot booking with a real operator before public launch.</li>
+  </ul>
+</section>
+
+<section id="compliance">
+  <h2>Compliance and business to-do <span class="tag">confirm with a lawyer / CA</span></h2>
+  <p>GST registration, Razorpay marketplace/route settlement KYC, DPDP Act privacy policy, Terms, cancellation/refund policy, state and aggregator regulations (Motor Vehicle Aggregator Guidelines), operator agreements (commission, settlement cycle, cancellation policy), ERP vendor partner agreements.</p>
+</section>
+
+<section id="open">
+  <h2>Decisions made and open items</h2>
+  <h3>Decided</h3>
+  <ul>
+    <li>Customer booking is <strong>app only</strong>. The website is marketing only; web also hosts the operator portal and super admin.</li>
+    <li>EC2: <code>ap-south-1</code>, <code>t2.small</code> to start, scale when users grow.</li>
+    <li>Launch date and budget are not fixed. The 8-week timeline is a working target for sequencing, not a commitment.</li>
+  </ul>
+  <h3>Open (decide when reached)</h3>
+  <ul>
+    <li>Which ERP/CRS vendors come first, ideally based on which vendors the first real operators use.</li>
+    <li>Expected number of operators at launch, and when to upgrade the database tier and EC2 size.</li>
+  </ul>
+</section>
+
+</main>
+<footer>Plan only. No code has been built yet.</footer>
+</body>
+</html>

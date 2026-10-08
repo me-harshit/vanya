@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+.expo/
+.next/
+
+# Secrets and environment (commit only .env.example)
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Mobile build artifacts
+*.apk
+*.aab
+*.ipa
+*.keystore
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+android/app/build/
+ios/Pods/
+
+# Database dumps and backups
+*.dump
+dump/
+
+# Claude Code local files
+.claude/
