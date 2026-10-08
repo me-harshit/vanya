@@ -40,3 +40,6 @@ dump/
 
 # Claude Code local files
 .claude/
+
+# Planning documents (local only)
+/plan

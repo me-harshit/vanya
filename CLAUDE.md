@@ -14,7 +14,22 @@ Full plan: `plan/plan.md` (readable version: `plan/index.html`). Read it before 
 - `operator-portal/`: portal for bus operators (direct listing, own ERP, third-party ERP)
 - `admin-portal/`: super admin panel for the client
 
-The shared backend API and shared types are not placed yet; see `plan/plan.md` section 3 for the intended monorepo layout and ask before creating them.
+- `backend/`: Node.js + TypeScript + Express 5 + Mongoose API. Secrets live in `backend/.env` (git-ignored; template in `.env.example`). Commands: `npm run dev`, `npm test` (each test file uses its own `vanya_test_*` database, dropped afterwards), `npm run db:check`, `npm run admin:create -- <phone> "Name"`.
+
+Shared types between projects are not decided yet; ask before creating a shared package.
+
+## Theme rule
+
+Design system: Option 1 (Milano Red `#A90E02` + Lemon Chiffon `#FFFBD4`) with dark mode, Geist font, Lucide icons animated by Morphicons. Details in `plan/design-system.md`.
+
+Every project (`website`, `operator-portal`, `admin-portal`, `mobile-app`) has ONE central theme file for colours, fonts and radii: `src/theme.css` for the web projects, a single `theme.ts` for the mobile app. Never hard-code a colour in a component; always read from the theme file, so changing that file re-colours the whole project.
+
+## Status
+
+- `website/`: built as a multi-page site (Vite + React + TypeScript): Home, Features, How it works, Routes (+ route detail), Offers, For operators, About, Help, Contact, and legal pages. Run `npm run dev` inside it. Routes, offers and team use SAMPLE data from `website/src/data/` (shown with a "Sample data" badge, controlled by `showSampleBadge` in `config.ts`); the contact form validates but does not send until the backend exists. Placeholders to fill before launch are in `website/src/config.ts` (store links, operator portal URL, support email and phone); legal pages in `website/src/pages/Legal.tsx` are drafts for lawyer review.
+- `backend/`: steps 1 and 2 done (project setup, config validation, MongoDB connection, phone OTP login with JWT and customer/operator/admin roles). OTPs print in the server log until the SMS provider (MSG91, needs DLT approval) is added. Master data is done too: cities, boarding/dropping points, operators (register + admin approval), buses with seat layouts, routes, trips (single and generated), public search and trip detail, trip cancellation. Run `npm run seed:cities` once to load major Indian cities. The seat hold engine is done (`backend/src/modules/trips/seatHold.ts`: `holdSeats`, `releaseSeats`, `getHold`, `confirmSeats`, `releaseBookedSeats`, `sweepExpiredHolds`; 10-minute holds, endpoints `POST/GET/DELETE /trips/:id/hold`). Bookings and payments are done and tested with a fake gateway (`PAYMENT_GATEWAY=mock`, the default): `POST /bookings` (from a live hold), `POST /bookings/:id/verify-payment`, webhook `POST /payments/razorpay/webhook`, cancel with refund tiers, operator trip cancel with full refunds, manifest, admin booking/refund views, and a reconcile job that finishes interrupted payments, refunds and expiries. The real Razorpay client (`src/modules/payments/razorpay.ts`) is written from the docs but NOT yet tested against the live API; test it in Razorpay test mode once keys exist, set `PAYMENT_GATEWAY=razorpay` plus the three `RAZORPAY_*` values, and set payments to auto-capture in the Razorpay dashboard. In development, `POST /dev/payments/:orderId/pay` fakes a successful payment (mock gateway only, never in production). Not built yet: coupons, partial (per-seat) cancellation, e-ticket PDF, SMS/email notifications, operator payout ledger, ERP adapters.
+- Other projects: not started.
+- `plan/` is git-ignored (local only), so planning documents are not pushed to GitHub.
 
 ## Stack (planned)
 
