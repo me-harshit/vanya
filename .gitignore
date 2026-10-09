@@ -43,3 +43,6 @@ dump/
 
 # Planning documents (local only)
 /plan
+
+# Markdown files in the repo root (progress.md and similar; local only)
+/*.md

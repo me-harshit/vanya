@@ -6,11 +6,14 @@ GitHub repo: https://github.com/me-harshit/vanya
 
 Full plan: `plan/plan.md` (readable version: `plan/index.html`). Read it before making design or architecture decisions, and keep both files in sync when the plan changes.
 
+Progress: `progress.md` (repo root) records what is built, what comes next, and how and why. Keep it updated whenever a step starts or is completed (status table, built list, next steps, change log).
+
 ## Folders
 
 - `plan/`: planning documents only
-- `website/`: marketing website (no booking)
-- `mobile-app/`: React Native (Expo) app for Android and iOS; customers book only here
+- `website/`: marketing website plus customer booking (booking added to scope 2026-10-09; search bar on the home page, then results, seat selection, payment, ticket)
+- `mobile-app/`: React Native (Expo) app for Android and iOS; customers book here too
+- Seat map shows gender (website and app): gender per seat, booked seats in two colours. The rule blocking a seat next to the other gender's booked seat is deferred (decided 2026-10-09); see `progress.md`.
 - `operator-portal/`: portal for bus operators (direct listing, own ERP, third-party ERP)
 - `admin-portal/`: super admin panel for the client
 

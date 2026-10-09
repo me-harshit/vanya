@@ -1,0 +1,75 @@
+/* ==========================================================================
+   THEME: the ONE file to edit to re-colour or re-font the whole operator portal.
+   Every component reads these variables; nothing else hard-codes a colour.
+   (Option 1: Milano Red + Lemon Chiffon, with a derived dark mode.)
+
+   Light values live in :root. Dark values apply when the visitor's system is
+   dark (unless they forced light) or when they chose dark with the toggle.
+   ========================================================================== */
+
+:root {
+  /* Fonts */
+  --font-sans: "Geist Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Shape */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  /* Colours: light */
+  --color-bg: #fffbd4;
+  --color-surface: #fffef0;
+  --color-border: #e8dfa6;
+  --color-text: #2a0f0c;
+  --color-muted: #6b4a44;
+  --color-primary: #a90e02;
+  --color-on-primary: #fffbd4;
+  --color-accent: #f5e89a;
+  --color-success: #1e8a52;
+  --color-warning: #b7791f;
+  --color-danger: #c62828;
+  --color-male: #2f6fd0;
+  --color-female: #d6338a;
+
+  color-scheme: light;
+}
+
+/* Dark mode: follows the system unless the visitor forced light */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #0e0e0f;
+    --color-surface: #181819;
+    --color-border: #2e2e30;
+    --color-text: #f3f0dc;
+    --color-muted: #a3a196;
+    --color-primary: #ff6a57;
+    --color-on-primary: #2a0a06;
+    --color-accent: #3a3516;
+    --color-success: #3dd68c;
+    --color-warning: #ffb020;
+    --color-danger: #ff6b6b;
+    --color-male: #6ea3ff;
+    --color-female: #ff7ab8;
+    color-scheme: dark;
+  }
+}
+
+/* Dark mode: forced by the toggle */
+:root[data-theme="dark"] {
+  --color-bg: #0e0e0f;
+  --color-surface: #181819;
+  --color-border: #2e2e30;
+  --color-text: #f3f0dc;
+  --color-muted: #a3a196;
+  --color-primary: #ff6a57;
+  --color-on-primary: #2a0a06;
+  --color-accent: #3a3516;
+  --color-success: #3dd68c;
+  --color-warning: #ffb020;
+  --color-danger: #ff6b6b;
+  --color-male: #6ea3ff;
+  --color-female: #ff7ab8;
+  color-scheme: dark;
+}
