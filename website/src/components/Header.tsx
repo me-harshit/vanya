@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { site } from "../config";
 import { Icon } from "./Icon";
+import { AccountMenu } from "./AccountMenu";
 import { ThemeToggle } from "./ThemeToggle";
 
 const links = [
@@ -34,10 +35,12 @@ export function Header() {
             <NavLink key={l.to} to={l.to}>{l.label}</NavLink>
           ))}
           <NavLink to="/contact" className="nav-contact">Contact</NavLink>
+          <NavLink to="/my-bookings" className="nav-contact">My bookings</NavLink>
         </nav>
 
         <div className="header-actions">
           <ThemeToggle />
+          <AccountMenu />
           <Link to={{ pathname: "/", hash: "#download" }} className="btn btn-primary header-cta">Get the app</Link>
           <button className="icon-btn menu-btn" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label="Menu">
             <Icon name={open ? "close" : "menu"} />

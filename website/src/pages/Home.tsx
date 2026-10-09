@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { DownloadBand, MoreLink, SampleTag, SectionHead } from "../components/Bits";
+import { HeroArt } from "../components/HeroArt";
 import { Icon } from "../components/Icon";
 import { PhoneMock } from "../components/PhoneMock";
 import { Reveal } from "../components/Reveal";
 import { RouteCard } from "../components/RouteCard";
+import { SearchBar } from "../components/SearchBar";
 import { StoreBadges } from "../components/StoreBadges";
 import { features, steps } from "../data/content";
 import { offers } from "../data/offers";
@@ -12,21 +14,34 @@ import { routes } from "../data/routes";
 export function Home() {
   return (
     <>
-      <section className="hero">
+      <section className="hero hero-compact">
         <div className="container hero-grid">
           <div>
             <span className="eyebrow">Bus tickets, made simple</span>
             <h1>Book your bus in a <em>few taps</em>.</h1>
             <p className="lead">Search routes, pick your exact seat, pay securely and travel with trusted operators across India.</p>
-            <div id="download"><StoreBadges /></div>
-            <p className="hero-note">Sign in with just your mobile number.</p>
           </div>
+          <div className="hero-art"><HeroArt /></div>
+        </div>
+        <div className="container hero-search">
+          <SearchBar />
+        </div>
+      </section>
+
+      <section className="section app-section">
+        <div className="container app-grid">
           <div className="hero-art">
             <div className="blob" />
             <PhoneMock />
             <span className="float-chip c1"><Icon name="seat" size={16} /> Seat A3 selected</span>
             <span className="float-chip c2"><Icon name="check" size={16} /> Free cancellation</span>
             <span className="float-chip c3"><Icon name="ticket" size={16} /> E-ticket in seconds</span>
+          </div>
+          <div>
+            <span className="eyebrow">Web and app</span>
+            <h2 className="app-title">Book on the web, or take it with you in the app.</h2>
+            <p className="lead">Sign in with just your mobile number. Your bookings and tickets are the same everywhere, so you can start on the website and board with the app.</p>
+            <div id="download"><StoreBadges /></div>
           </div>
         </div>
       </section>

@@ -30,6 +30,8 @@
   --color-success: #1e8a52;
   --color-warning: #b7791f;
   --color-danger: #c62828;
+  --color-male: #2f6fd0;
+  --color-female: #d6338a;
 
   color-scheme: light;
 }
@@ -37,33 +39,37 @@
 /* Dark mode: follows the system unless the visitor forced light */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --color-bg: #1c0b09;
-    --color-surface: #2a1411;
-    --color-border: #4a2a25;
-    --color-text: #fffbd4;
-    --color-muted: #c9bfa0;
+    --color-bg: #0e0e0f;
+    --color-surface: #181819;
+    --color-border: #2e2e30;
+    --color-text: #f3f0dc;
+    --color-muted: #a3a196;
     --color-primary: #ff6a57;
     --color-on-primary: #2a0a06;
-    --color-accent: #6b5a1e;
+    --color-accent: #3a3516;
     --color-success: #3dd68c;
     --color-warning: #ffb020;
     --color-danger: #ff6b6b;
+    --color-male: #6ea3ff;
+    --color-female: #ff7ab8;
     color-scheme: dark;
   }
 }
 
 /* Dark mode: forced by the toggle */
 :root[data-theme="dark"] {
-  --color-bg: #1c0b09;
-  --color-surface: #2a1411;
-  --color-border: #4a2a25;
-  --color-text: #fffbd4;
-  --color-muted: #c9bfa0;
+  --color-bg: #0e0e0f;
+  --color-surface: #181819;
+  --color-border: #2e2e30;
+  --color-text: #f3f0dc;
+  --color-muted: #a3a196;
   --color-primary: #ff6a57;
   --color-on-primary: #2a0a06;
-  --color-accent: #6b5a1e;
+  --color-accent: #3a3516;
   --color-success: #3dd68c;
   --color-warning: #ffb020;
   --color-danger: #ff6b6b;
+  --color-male: #6ea3ff;
+  --color-female: #ff7ab8;
   color-scheme: dark;
 }

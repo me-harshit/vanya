@@ -26,7 +26,10 @@ export function Operators() {
         <p>Sell more seats with less effort. Choose the way of listing that fits your business.</p>
         <div className="store-row">
           {site.operatorPortalUrl ? (
-            <a className="btn btn-primary" href={site.operatorPortalUrl}>Register as operator <Icon name="arrow" size={18} /></a>
+            <>
+              <a className="btn btn-primary" href={`${site.operatorPortalUrl}/register`}>Join as an operator <Icon name="arrow" size={18} /></a>
+              <a className="btn btn-ghost" href={site.operatorPortalUrl}>Operator login</a>
+            </>
           ) : (
             <span className="btn btn-primary btn-disabled">Operator registration opens soon</span>
           )}

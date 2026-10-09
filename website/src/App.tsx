@@ -13,6 +13,15 @@ import { NotFound } from "./pages/NotFound";
 import { Offers } from "./pages/Offers";
 import { Operators } from "./pages/Operators";
 import { RouteDetail, RoutesPage } from "./pages/Routes";
+import { Book } from "./pages/Book";
+import { Passengers } from "./pages/Passengers";
+import { Payment } from "./pages/Payment";
+import { Ticket } from "./pages/Ticket";
+import { BookingDetail } from "./pages/BookingDetail";
+import { Cancel } from "./pages/Cancel";
+import { Login } from "./pages/Login";
+import { MyBookings } from "./pages/MyBookings";
+import { Search } from "./pages/Search";
 
 // Scroll to top on page change, or to the #section when a hash is present.
 function ScrollManager() {
@@ -35,6 +44,15 @@ export default function App() {
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/book/:tripId" element={<Book />} />
+          <Route path="/book/:tripId/passengers" element={<Passengers />} />
+          <Route path="/book/:tripId/payment" element={<Payment />} />
+          <Route path="/book/:tripId/ticket" element={<Ticket />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/my-bookings" element={<MyBookings />} />
+          <Route path="/my-bookings/:id" element={<BookingDetail />} />
+          <Route path="/my-bookings/:id/cancel" element={<Cancel />} />
           <Route path="/features" element={<Features />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/routes" element={<RoutesPage />} />
